@@ -31,7 +31,7 @@ class JoinVerificationService {
     this.ctx.on('notice.group.request.add', this.handleRequest.bind(this))
     this.ctx.on('milky.group.request.add', this.handleRequest.bind(this))
     this.ctx.on('guild-member-request', this.handleRequest.bind(this))
-    this.ctx.on('message/group', this.handleGroupMessage.bind(this))
+    this.ctx.on('message-created', this.handleGroupMessage.bind(this))
     this.registerCommands()
   }
 
@@ -281,8 +281,12 @@ class JoinVerificationService {
   }
 
   private async handleGroupMessage(session: Session) {
+    // 只处理群消息
+    if (!session.groupId) return
+    
     const { userId, groupId } = session
-    const content = session.content.trim()
+    const content = session.content?.trim()
+    if (!content) return
 
     // 查找待处理请求
     const key = `${groupId}:${userId}`
