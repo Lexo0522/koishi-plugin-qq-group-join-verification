@@ -148,7 +148,9 @@ MIT License
 
 ## 👨‍💻 作者
 
-kate522
+- **姓名**：kate522
+- **邮箱**：kate522@88.com
+- **GitHub**：[Lexo0522](https://github.com/Lexo0522)
 
 ## 🤝 贡献
 
@@ -156,7 +158,12 @@ kate522
 
 ## 📞 联系方式
 
-如有问题，请在 GitHub 上提交 Issue，或联系作者。
+如有问题，请在 GitHub 上提交 Issue，或发送邮件至 kate522@88.com。
+
+## 🔗 相关链接
+
+- **GitHub 仓库**：[koishi-plugin-qq-group-join-verification](https://github.com/Lexo0522/koishi-plugin-qq-group-join-verification)
+- **Npm 包**：[koishi-plugin-qq-group-join-verification](https://www.npmjs.com/package/koishi-plugin-qq-group-join-verification)
 
 ---
 
