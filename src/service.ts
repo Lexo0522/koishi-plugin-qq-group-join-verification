@@ -35,9 +35,8 @@ class JoinVerificationService {
   }
 
   private registerCommands() {
-    // 注册管理员指令
+    // 注册超级管理员指令
     this.ctx.command('verify', '群验证管理', {
-      authority: 3,
       usage: 'verify <action> [params...]',
       examples: [
         'verify enable - 开启群验证',
@@ -46,12 +45,20 @@ class JoinVerificationService {
         'verify timeout 300 - 设置验证码时长为5分钟',
         'verify whitelist add 123456 - 添加白名单',
         'verify whitelist remove 123456 - 移除白名单',
+        'verify whitelist list - 查看白名单',
         'verify audit - 查询验证记录',
+        'verify admin add 123456 - 添加超级管理员',
+        'verify admin remove 123456 - 移除超级管理员',
+        'verify admin list - 查看超级管理员',
       ],
     })
       .action(async (session, action, ...params) => {
         const { groupId, userId } = session
         if (!groupId) return '请在群内使用此命令'
+
+        // 检查是否为超级管理员
+        const isSuperAdmin = await this.databaseService.isSuperAdmin(userId)
+        if (!isSuperAdmin) return '权限不足，只有超级管理员可以使用此命令'
 
         switch (action) {
           case 'enable':
@@ -66,10 +73,35 @@ class JoinVerificationService {
             return this.manageWhitelist(userId, params[0], parseInt(params[1]), params[2])
           case 'audit':
             return this.getAuditData(groupId)
+          case 'admin':
+            return this.manageSuperAdmin(params[0], parseInt(params[1]), params[2])
           default:
             return '未知命令，请使用 verify help 查看帮助'
         }
       })
+  }
+
+  private async manageSuperAdmin(action: string, targetUserId: number, remark?: string): Promise<string> {
+    if (isNaN(targetUserId)) {
+      return '无效的用户ID'
+    }
+
+    switch (action) {
+      case 'add':
+        await this.databaseService.addSuperAdmin(targetUserId, remark)
+        return `已添加用户 ${targetUserId} 为超级管理员`
+      case 'remove':
+        await this.databaseService.removeSuperAdmin(targetUserId)
+        return `已移除用户 ${targetUserId} 的超级管理员权限`
+      case 'list':
+        const admins = await this.databaseService.getSuperAdmins()
+        if (admins.length === 0) {
+          return '暂无超级管理员'
+        }
+        return admins.map(admin => `${admin.userId}${admin.remark ? ` (${admin.remark})` : ''}`).join('\n')
+      default:
+        return '无效的超级管理员操作，请使用 add/remove/list'
+    }
   }
 
   private async enableVerification(groupId: number): Promise<string> {
@@ -203,15 +235,13 @@ class JoinVerificationService {
     if (config.mode === 'image-captcha') {
       const result = captchaService.generateImageCaptcha(config.captchaLength)
       captcha = result.code
-      message = config.waitingMsg
-        .replace('{captcha}', '')
-        .replace('{timeout}', config.timeout.toString())
       // 发送图片验证码到群内
       try {
         await bot.sendGroupMessage(groupId, [
-          { type: 'text', content: `[加群验证] 请 ${userId} 输入验证码：` },
-          { type: 'text', content: message },
+          { type: 'text', content: `欢迎加入日常分享群～进群请发：` },
+          { type: 'text', content: `【图片验证码】` },
           { type: 'image', content: `data:image/svg+xml;base64,${Buffer.from(result.svg).toString('base64')}` },
+          { type: 'text', content: `发完即可畅聊，禁止广告、刷屏、引战。` },
         ])
       } catch (error) {
         this.logger.error(`发送图片验证码失败: ${error}`)
@@ -220,12 +250,9 @@ class JoinVerificationService {
       }
     } else {
       captcha = captchaService.generateTextCaptcha(config.captchaLength)
-      message = config.waitingMsg
-        .replace('{captcha}', captcha)
-        .replace('{timeout}', config.timeout.toString())
       // 发送文本验证码到群内
       try {
-        await bot.sendGroupMessage(groupId, `[加群验证] 请 ${userId} 输入验证码：${message}`)
+        await bot.sendGroupMessage(groupId, `欢迎加入日常分享群～进群请发：\n【${captcha}】\n发完即可畅聊，禁止广告、刷屏、引战。`)
       } catch (error) {
         this.logger.error(`发送文本验证码失败: ${error}`)
         await this.rejectRequest(bot, request, config, '无法发送验证码')

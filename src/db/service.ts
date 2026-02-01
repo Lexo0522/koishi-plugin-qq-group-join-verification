@@ -1,6 +1,6 @@
 import { Context } from '@koishijs/core'
 import { Database } from '@koishijs/plugin-database'
-import { GroupConfig, Whitelist, VerifyRecord } from './model'
+import { GroupConfig, Whitelist, VerifyRecord, SuperAdmin } from './model'
 
 export class DatabaseService {
   private db: Database
@@ -14,6 +14,7 @@ export class DatabaseService {
     this.db.extend(GroupConfig)
     this.db.extend(Whitelist)
     this.db.extend(VerifyRecord)
+    this.db.extend(SuperAdmin)
   }
 
   // GroupConfig 相关方法
@@ -64,5 +65,27 @@ export class DatabaseService {
     if (groupId) query.groupId = groupId
     if (userId) query.userId = userId
     return this.db.get(VerifyRecord, query)
+  }
+
+  // SuperAdmin 相关方法
+  async isSuperAdmin(userId: number): Promise<boolean> {
+    const result = await this.db.get(SuperAdmin, userId)
+    return !!result
+  }
+
+  async addSuperAdmin(userId: number, remark?: string): Promise<void> {
+    await this.db.set(SuperAdmin, {
+      userId,
+      remark,
+      createTime: new Date(),
+    })
+  }
+
+  async removeSuperAdmin(userId: number): Promise<void> {
+    await this.db.remove(SuperAdmin, userId)
+  }
+
+  async getSuperAdmins(): Promise<SuperAdmin[]> {
+    return this.db.get(SuperAdmin)
   }
 }

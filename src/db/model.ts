@@ -66,3 +66,15 @@ export class VerifyRecord {
   @CreateDateColumn()
   verifyTime: Date
 }
+
+@Entity('qq_group_verify_super_admin')
+export class SuperAdmin {
+  @PrimaryColumn()
+  userId: number
+
+  @Column({ nullable: true })
+  remark?: string
+
+  @CreateDateColumn()
+  createTime: Date
+}
