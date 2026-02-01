@@ -16,7 +16,7 @@ export class GroupConfig {
   captchaLength: number = 4
 
   @Column()
-  timeout: number = 180
+  timeout: number = 300
 
   @Column()
   skipInGroupUser: boolean = true

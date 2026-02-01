@@ -4,6 +4,19 @@ Koishi 插件，用于 QQ 群加群验证，支持多适配器、多群独立配
 
 ## 📋 更新记录
 
+### v1.0.5
+- 设置验证码时长默认为5分钟（300秒）
+- 添加超级管理员指令功能：
+  - `verify enable` - 开启群验证
+  - `verify disable` - 关闭群验证
+  - `verify mode <mode>` - 切换验证方式（captcha/image-captcha/whitelist）
+  - `verify timeout <seconds>` - 设置验证码时长
+  - `verify whitelist add <userId> [remark]` - 添加白名单
+  - `verify whitelist remove <userId>` - 移除白名单
+  - `verify whitelist list` - 查看白名单
+  - `verify audit` - 查询验证记录
+- 管理员可以通过指令控制群验证功能，无需进入控制台
+
 ### v1.0.4
 - 修复 ES 模块导入错误，添加 "type": "module" 配置
 - 确保插件能够正确加载和运行

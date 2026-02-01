@@ -31,6 +31,120 @@ class JoinVerificationService {
     this.ctx.on('notice.group.request.add', this.handleRequest.bind(this))
     this.ctx.on('milky.group.request.add', this.handleRequest.bind(this))
     this.ctx.on('message/group', this.handleGroupMessage.bind(this))
+    this.registerCommands()
+  }
+
+  private registerCommands() {
+    // 注册管理员指令
+    this.ctx.command('verify', '群验证管理', {
+      authority: 3,
+      usage: 'verify <action> [params...]',
+      examples: [
+        'verify enable - 开启群验证',
+        'verify disable - 关闭群验证',
+        'verify mode captcha - 设置验证模式为文本验证码',
+        'verify timeout 300 - 设置验证码时长为5分钟',
+        'verify whitelist add 123456 - 添加白名单',
+        'verify whitelist remove 123456 - 移除白名单',
+        'verify audit - 查询验证记录',
+      ],
+    })
+      .action(async (session, action, ...params) => {
+        const { groupId, userId } = session
+        if (!groupId) return '请在群内使用此命令'
+
+        switch (action) {
+          case 'enable':
+            return this.enableVerification(groupId)
+          case 'disable':
+            return this.disableVerification(groupId)
+          case 'mode':
+            return this.setVerifyMode(groupId, params[0])
+          case 'timeout':
+            return this.setVerifyTimeout(groupId, parseInt(params[0]))
+          case 'whitelist':
+            return this.manageWhitelist(userId, params[0], parseInt(params[1]), params[2])
+          case 'audit':
+            return this.getAuditData(groupId)
+          default:
+            return '未知命令，请使用 verify help 查看帮助'
+        }
+      })
+  }
+
+  private async enableVerification(groupId: number): Promise<string> {
+    const config = await this.getGroupConfig(groupId)
+    config.mode = 'captcha' // 默认启用文本验证码
+    await this.databaseService.setGroupConfig(config)
+    return '群验证已开启，默认使用文本验证码模式'
+  }
+
+  private async disableVerification(groupId: number): Promise<string> {
+    const config = await this.getGroupConfig(groupId)
+    config.mode = 'whitelist' // 设置为白名单模式，相当于关闭验证
+    await this.databaseService.setGroupConfig(config)
+    return '群验证已关闭'
+  }
+
+  private async setVerifyMode(groupId: number, mode: string): Promise<string> {
+    const validModes = ['whitelist', 'captcha', 'image-captcha']
+    if (!validModes.includes(mode)) {
+      return `无效的验证模式，请选择：${validModes.join(', ')}`
+    }
+
+    const config = await this.getGroupConfig(groupId)
+    config.mode = mode as any
+    await this.databaseService.setGroupConfig(config)
+    return `验证模式已设置为：${mode}`
+  }
+
+  private async setVerifyTimeout(groupId: number, timeout: number): Promise<string> {
+    if (isNaN(timeout) || timeout < 60 || timeout > 3600) {
+      return '无效的超时时间，请设置 60-3600 秒之间的值'
+    }
+
+    const config = await this.getGroupConfig(groupId)
+    config.timeout = timeout
+    await this.databaseService.setGroupConfig(config)
+    return `验证码时长已设置为：${timeout}秒`
+  }
+
+  private async manageWhitelist(userId: number, action: string, targetUserId: number, remark?: string): Promise<string> {
+    if (isNaN(targetUserId)) {
+      return '无效的用户ID'
+    }
+
+    switch (action) {
+      case 'add':
+        await this.databaseService.addToWhitelist(targetUserId, remark)
+        return `已添加用户 ${targetUserId} 到白名单`
+      case 'remove':
+        await this.databaseService.removeFromWhitelist(targetUserId)
+        return `已从白名单移除用户 ${targetUserId}`
+      case 'list':
+        const whitelist = await this.databaseService.getWhitelist()
+        if (whitelist.length === 0) {
+          return '白名单为空'
+        }
+        return whitelist.map(item => `${item.userId}${item.remark ? ` (${item.remark})` : ''}`).join('\n')
+      default:
+        return '无效的白名单操作，请使用 add/remove/list'
+    }
+  }
+
+  private async getAuditData(groupId: number): Promise<string> {
+    const records = await this.databaseService.getVerifyRecords(groupId)
+    if (records.length === 0) {
+      return '暂无验证记录'
+    }
+
+    const recentRecords = records.slice(-10) // 只显示最近10条记录
+    const lines = recentRecords.map(record => {
+      const time = new Date(record.verifyTime).toLocaleString()
+      return `${time} - ${record.userId} - ${record.type} - ${record.result}`
+    })
+
+    return `最近10条验证记录：\n${lines.join('\n')}`
   }
 
   private async handleRequest(session: Session) {
