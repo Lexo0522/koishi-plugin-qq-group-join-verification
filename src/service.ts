@@ -30,6 +30,7 @@ class JoinVerificationService {
     this.ctx.on('notice/group-request', this.handleRequest.bind(this))
     this.ctx.on('notice.group.request.add', this.handleRequest.bind(this))
     this.ctx.on('milky.group.request.add', this.handleRequest.bind(this))
+    this.ctx.on('guild-member-request', this.handleRequest.bind(this))
     this.ctx.on('message/group', this.handleGroupMessage.bind(this))
     this.registerCommands()
   }

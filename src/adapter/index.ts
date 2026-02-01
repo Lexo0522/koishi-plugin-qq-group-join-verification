@@ -37,6 +37,15 @@ export class AdapterService {
       }
     }
 
+    // guild-member-request event
+    if (event.type === 'guild-member-request') {
+      return {
+        groupId: Number(event.groupId || event.group_id),
+        userId: Number(event.userId || event.user_id),
+        flag: event.flag,
+      }
+    }
+
     return null
   }
 
