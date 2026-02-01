@@ -4,6 +4,11 @@ Koishi 插件，用于 QQ 群加群验证，支持多适配器、多群独立配
 
 ## 📋 更新记录
 
+### v1.0.2
+- 修复依赖版本问题，移除对 @koishijs/plugin-database 的直接依赖
+- 优化依赖配置，确保与 Koishi v4 兼容
+- 修复市场插件解析错误
+
 ### v1.0.1
 - 添加作者邮箱：kate522@88.com
 - 添加 GitHub 仓库地址：https://github.com/Lexo0522/koishi-plugin-qq-group-join-verification

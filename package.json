@@ -1,6 +1,6 @@
 {
   "name": "koishi-plugin-qq-group-join-verification",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Koishi 插件，用于 QQ 群加群验证，支持多适配器、多群独立配置、图片验证码、超时拒绝、白名单、数据库持久化、Console 可视化后台",
   "author": {
     "name": "kate522",
@@ -30,9 +30,8 @@
     "dev": "tsc -w"
   },
   "dependencies": {
-    "@koishijs/core": "^4.0.0",
-    "@koishijs/plugin-database": "^2.0.0",
-    "@koishijs/plugin-console": "^5.0.0",
+    "@koishijs/core": "^4.17.0",
+    "@koishijs/plugin-console": "^5.28.0",
     "svg-captcha": "^1.4.0"
   },
   "devDependencies": {
