@@ -30,7 +30,7 @@ class JoinVerificationService {
     this.ctx.on('notice/group-request', this.handleRequest.bind(this))
     this.ctx.on('notice.group.request.add', this.handleRequest.bind(this))
     this.ctx.on('milky.group.request.add', this.handleRequest.bind(this))
-    this.ctx.on('message/private', this.handlePrivateMessage.bind(this))
+    this.ctx.on('message/group', this.handleGroupMessage.bind(this))
   }
 
   private async handleRequest(session: Session) {
@@ -92,9 +92,10 @@ class JoinVerificationService {
       message = config.waitingMsg
         .replace('{captcha}', '')
         .replace('{timeout}', config.timeout.toString())
-      // 发送图片验证码
+      // 发送图片验证码到群内
       try {
-        await bot.sendPrivateMessage(userId, [
+        await bot.sendGroupMessage(groupId, [
+          { type: 'text', content: `[加群验证] 请 ${userId} 输入验证码：` },
           { type: 'text', content: message },
           { type: 'image', content: `data:image/svg+xml;base64,${Buffer.from(result.svg).toString('base64')}` },
         ])
@@ -108,9 +109,9 @@ class JoinVerificationService {
       message = config.waitingMsg
         .replace('{captcha}', captcha)
         .replace('{timeout}', config.timeout.toString())
-      // 发送文本验证码
+      // 发送文本验证码到群内
       try {
-        await bot.sendPrivateMessage(userId, message)
+        await bot.sendGroupMessage(groupId, `[加群验证] 请 ${userId} 输入验证码：${message}`)
       } catch (error) {
         this.logger.error(`发送文本验证码失败: ${error}`)
         await this.rejectRequest(bot, request, config, '无法发送验证码')
@@ -137,17 +138,15 @@ class JoinVerificationService {
     })
   }
 
-  private async handlePrivateMessage(session: Session) {
-    const { userId } = session
+  private async handleGroupMessage(session: Session) {
+    const { userId, groupId } = session
     const content = session.content.trim()
 
     // 查找待处理请求
-    for (const [key, pending] of this.pendingRequests.entries()) {
-      const [, reqUserId] = key.split(':').map(Number)
-      if (reqUserId === userId) {
-        await this.verifyCaptcha(pending, content)
-        break
-      }
+    const key = `${groupId}:${userId}`
+    const pending = this.pendingRequests.get(key)
+    if (pending) {
+      await this.verifyCaptcha(pending, content)
     }
   }
 
@@ -200,9 +199,9 @@ class JoinVerificationService {
     // 同意请求
     await this.adapterService.approve(bot, groupId, userId, flag)
 
-    // 发送通过消息
+    // 发送通过消息到群内
     try {
-      await bot.sendPrivateMessage(userId, config.approveMsg)
+      await bot.sendGroupMessage(groupId, `[加群验证] ${userId} ${config.approveMsg}`)
     } catch (error) {
       this.logger.error(`发送通过消息失败: ${error}`)
     }
@@ -224,9 +223,9 @@ class JoinVerificationService {
     // 拒绝请求
     await this.adapterService.reject(bot, groupId, userId, flag, config.rejectMsg)
 
-    // 发送拒绝消息
+    // 发送拒绝消息到群内
     try {
-      await bot.sendPrivateMessage(userId, config.rejectMsg)
+      await bot.sendGroupMessage(groupId, `[加群验证] ${userId} ${config.rejectMsg}`)
     } catch (error) {
       this.logger.error(`发送拒绝消息失败: ${error}`)
     }
