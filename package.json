@@ -1,0 +1,51 @@
+{
+  "name": "koishi-plugin-qq-group-join-verification",
+  "version": "1.0.0",
+  "description": "Koishi 插件，用于 QQ 群加群验证，支持多适配器、多群独立配置、图片验证码、超时拒绝、白名单、数据库持久化、Console 可视化后台",
+  "author": "kate522",
+  "main": "src/index.ts",
+  "typings": "src/index.ts",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "keywords": [
+    "koishi",
+    "plugin",
+    "qq",
+    "group",
+    "verification",
+    "captcha"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc && koishi-console build",
+    "dev": "tsc -w"
+  },
+  "dependencies": {
+    "@koishijs/core": "^4.0.0",
+    "@koishijs/plugin-database": "^2.0.0",
+    "@koishijs/plugin-console": "^5.0.0",
+    "svg-captcha": "^1.4.0"
+  },
+  "devDependencies": {
+    "@koishijs/console": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "@types/svg-captcha": "^1.4.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "koishi": "^4.17.0"
+  },
+  "koishi": {
+    "description": {
+      "zh": "QQ 群加群验证插件，支持多适配器、多群独立配置、图片验证码、超时拒绝、白名单、数据库持久化、Console 可视化后台"
+    },
+    "service": {
+      "required": ["database"]
+    },
+    "console": {
+      "package": "@koishijs/console"
+    }
+  }
+}
