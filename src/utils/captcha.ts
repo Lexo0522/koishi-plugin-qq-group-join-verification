@@ -1,15 +1,9 @@
 import svgCaptcha from 'svg-captcha'
 
-interface CaptchaCacheItem {
-  code: string
-  expireTime: number
-}
-
 class CaptchaService {
-  private cache: Map<string, CaptchaCacheItem>
+  private cache: Map<string, { code: string; expireTime: number }> = new Map()
 
   constructor() {
-    this.cache = new Map()
     this.startCleanupTimer()
   }
 
@@ -73,4 +67,10 @@ class CaptchaService {
   }
 }
 
-export const captchaService = new CaptchaService()
+const captchaService = new CaptchaService()
+
+export {
+  captchaService,
+}
+
+export default captchaService

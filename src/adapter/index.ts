@@ -1,15 +1,10 @@
-import { Bot, Context } from '@koishijs/core'
+import { Bot, Context } from 'koishi'
 
-export interface GroupRequest {
-  groupId: number
-  userId: number
-  flag: string
-}
+class AdapterService {
+  constructor(private ctx: Context) {
+  }
 
-export class AdapterService {
-  constructor(private ctx: Context) {}
-
-  parseRequest(bot: Bot, event: any): GroupRequest | null {
+  parseRequest(bot: Bot, event: any) {
     // adapter-onebot
     if (event.post_type === 'notice' && event.notice_type === 'group_request') {
       return {
@@ -49,9 +44,9 @@ export class AdapterService {
     return null
   }
 
-  async approve(bot: Bot, groupId: number, userId: number, flag: string): Promise<void> {
+  async approve(bot: Bot, groupId: number, userId: number, flag: string) {
     // adapter-onebot
-    if (bot.adapter.name === 'onebot') {
+    if (bot.platform === 'onebot') {
       await bot.internal('set_group_add_request', {
         flag,
         sub_type: 'add',
@@ -61,7 +56,7 @@ export class AdapterService {
     }
 
     // adapter-red
-    if (bot.adapter.name === 'red') {
+    if (bot.platform === 'red') {
       await bot.internal('approveGroupRequest', {
         groupId,
         userId,
@@ -71,7 +66,7 @@ export class AdapterService {
     }
 
     // adapter-milky
-    if (bot.adapter.name === 'milky') {
+    if (bot.platform === 'milky') {
       await bot.internal('approveGroupRequest', {
         flag,
         approve: true,
@@ -79,12 +74,12 @@ export class AdapterService {
       return
     }
 
-    throw new Error(`Adapter ${bot.adapter.name} not supported`)
+    throw new Error(`Adapter ${bot.platform} not supported`)
   }
 
-  async reject(bot: Bot, groupId: number, userId: number, flag: string, reason?: string): Promise<void> {
+  async reject(bot: Bot, groupId: number, userId: number, flag: string, reason?: string) {
     // adapter-onebot
-    if (bot.adapter.name === 'onebot') {
+    if (bot.platform === 'onebot') {
       await bot.internal('set_group_add_request', {
         flag,
         sub_type: 'add',
@@ -95,7 +90,7 @@ export class AdapterService {
     }
 
     // adapter-red
-    if (bot.adapter.name === 'red') {
+    if (bot.platform === 'red') {
       await bot.internal('rejectGroupRequest', {
         groupId,
         userId,
@@ -106,7 +101,7 @@ export class AdapterService {
     }
 
     // adapter-milky
-    if (bot.adapter.name === 'milky') {
+    if (bot.platform === 'milky') {
       await bot.internal('approveGroupRequest', {
         flag,
         approve: false,
@@ -115,12 +110,12 @@ export class AdapterService {
       return
     }
 
-    throw new Error(`Adapter ${bot.adapter.name} not supported`)
+    throw new Error(`Adapter ${bot.platform} not supported`)
   }
 
-  async isUserInGroup(bot: Bot, groupId: number, userId: number): Promise<boolean> {
+  async isUserInGroup(bot: Bot, groupId: number, userId: number) {
     // adapter-onebot
-    if (bot.adapter.name === 'onebot') {
+    if (bot.platform === 'onebot') {
       try {
         const member = await bot.internal('get_group_member_info', {
           group_id: groupId,
@@ -133,7 +128,7 @@ export class AdapterService {
     }
 
     // adapter-red
-    if (bot.adapter.name === 'red') {
+    if (bot.platform === 'red') {
       try {
         const member = await bot.internal('getGroupMember', {
           groupId,
@@ -146,7 +141,7 @@ export class AdapterService {
     }
 
     // adapter-milky
-    if (bot.adapter.name === 'milky') {
+    if (bot.platform === 'milky') {
       try {
         const member = await bot.internal('getGroupMemberInfo', {
           group_id: groupId,
@@ -161,3 +156,5 @@ export class AdapterService {
     return false
   }
 }
+
+export default AdapterService

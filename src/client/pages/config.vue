@@ -22,8 +22,12 @@
               </el-select>
             </el-form-item>
 
-            <el-form-item label="验证模式">
-              <el-select v-model="currentConfig.mode">
+            <el-form-item label="开启群聊验证">
+              <el-switch v-model="isVerificationEnabled" @change="toggleVerification" />
+            </el-form-item>
+
+            <el-form-item label="验证模式" :disabled="!isVerificationEnabled">
+              <el-select v-model="currentConfig.mode" :disabled="!isVerificationEnabled">
                 <el-option label="仅白名单" value="whitelist" />
                 <el-option label="文本验证码" value="captcha" />
                 <el-option label="图片验证码" value="image-captcha" />
@@ -134,6 +138,7 @@ interface WhitelistItem {
 const activeTab = ref('group')
 const selectedGroup = ref<number>(0)
 const groups = ref<GroupConfig[]>([])
+const isVerificationEnabled = ref(true)
 const currentConfig = reactive<GroupConfig>({
   groupId: 0,
   mode: 'captcha',
@@ -171,9 +176,37 @@ const loadGroupConfig = async () => {
   const config = groups.value.find(g => g.groupId === selectedGroup.value)
   if (config) {
     Object.assign(currentConfig, config)
+    // 根据验证模式判断是否启用
+    isVerificationEnabled.value = config.mode !== 'whitelist'
   } else {
     // 新群，使用默认配置
     currentConfig.groupId = selectedGroup.value
+    isVerificationEnabled.value = true
+  }
+}
+
+// 切换验证状态
+const toggleVerification = async () => {
+  if (!selectedGroup.value) {
+    toast.warning('请先选择群聊')
+    isVerificationEnabled.value = false
+    return
+  }
+  
+  try {
+    if (isVerificationEnabled.value) {
+      // 启用验证
+      currentConfig.mode = 'captcha' // 默认使用文本验证码
+    } else {
+      // 禁用验证
+      currentConfig.mode = 'whitelist'
+    }
+    
+    await saveGroupConfig()
+  } catch (error) {
+    toast.error('切换验证状态失败')
+    // 恢复原来的状态
+    isVerificationEnabled.value = !isVerificationEnabled.value
   }
 }
 

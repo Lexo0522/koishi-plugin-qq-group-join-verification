@@ -1,7 +1,6 @@
-import { Context } from '@koishijs/plugin-console'
 import ConfigPage from './pages/config.vue'
 
-export default (ctx: Context) => {
+export default function (ctx: any) {
   ctx.addPage({
     name: 'qq-group-join-verification',
     path: '/qq-group-join-verification',
