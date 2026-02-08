@@ -4,6 +4,24 @@ Koishi 插件，用于 QQ 群加群验证，支持多适配器、多群独立配
 
 ## 📋 更新记录
 
+### v1.0.61
+- 数据库系统修复：
+  - 修复数据库表注册问题，确保表结构定义符合 Minato 规范
+  - 简化表结构定义，使用纯 JavaScript 对象与显式类型声明
+  - 移除不必要的 setTimeout 延迟，实现同步表注册
+  - 修复 TypeScript 类型错误，确保编译通过
+  - 确保表结构定义正确，解决 "Cannot read properties of undefined (reading 'type')" 错误
+
+- 命令系统优化：
+  - 修复命令动作函数，使用正确的参数模式
+  - 确保所有命令都能正确执行，不再显示帮助信息
+  - 优化命令注册逻辑，提高可靠性
+
+- 系统稳定性：
+  - 修复 Cordis 框架 "Cannot access 'dispose' before initialization" 错误
+  - 确保插件初始化顺序正确，避免驱动未就绪时的调用
+  - 提高插件启动速度和稳定性
+
 ### v1.0.41
 - 全局清理 console 引用：
   - 移除 `export const inject = ['console']` 声明
