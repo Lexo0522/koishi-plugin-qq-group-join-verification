@@ -64,11 +64,41 @@ class DatabaseService {
     try {
       const model = this.ctx.model as any
       if (table === 'group_config' && data.groupId) {
-        await model.upsert(table, { groupId: data.groupId }, [data])
+        this.logger.info(`Setting group_config for group ${data.groupId}:`, data)
+        // 先检查数据是否存在
+        const existing = await model.get(table, { groupId: data.groupId })
+        this.logger.info(`Existing group_config:`, existing)
+        if (existing) {
+          // 更新现有数据
+          this.logger.info(`Updating existing group_config`)
+          await model.update(table, { groupId: data.groupId }, data)
+        } else {
+          // 插入新数据
+          this.logger.info(`Creating new group_config`)
+          await model.create(table, data)
+        }
       } else if (table === 'whitelist' && data.userId) {
-        await model.upsert(table, { userId: data.userId }, [data])
+        this.logger.info(`Setting whitelist for user ${data.userId}:`, data)
+        const existing = await model.get(table, { userId: data.userId })
+        this.logger.info(`Existing whitelist:`, existing)
+        if (existing) {
+          this.logger.info(`Updating existing whitelist`)
+          await model.update(table, { userId: data.userId }, data)
+        } else {
+          this.logger.info(`Creating new whitelist`)
+          await model.create(table, data)
+        }
       } else if (table === 'super_admin' && data.userId) {
-        await model.upsert(table, { userId: data.userId }, [data])
+        this.logger.info(`Setting super_admin for user ${data.userId}:`, data)
+        const existing = await model.get(table, { userId: data.userId })
+        this.logger.info(`Existing super_admin:`, existing)
+        if (existing) {
+          this.logger.info(`Updating existing super_admin`)
+          await model.update(table, { userId: data.userId }, data)
+        } else {
+          this.logger.info(`Creating new super_admin`)
+          await model.create(table, data)
+        }
       }
     } catch (error) {
       this.logger.warn(`Failed to set ${table}:`, error)

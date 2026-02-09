@@ -588,6 +588,9 @@ class JoinVerificationService {
     const key = `${groupId}:${userId}`
     const pending = this.pendingRequests.get(key)
     if (pending) {
+      if (this.config.enableLog) {
+        this.logger.info(`收到用户 ${userId} 在群 ${groupId} 的验证码消息: ${content}`)
+      }
       await this.verifyCaptcha(pending, content)
     }
   }
@@ -611,8 +614,14 @@ class JoinVerificationService {
     const isCorrect = captchaService.verifyCaptcha(key, input)
     if (isCorrect) {
       this.verifyAttempts.delete(key) // 验证成功，清除尝试记录
+      if (this.config.enableLog) {
+        this.logger.info(`验证码验证成功: 群 ${groupId}, 用户 ${userId}`)
+      }
       await this.approveRequest(bot, request, config, config.mode)
     } else {
+      if (this.config.enableLog) {
+        this.logger.info(`验证码验证失败: 群 ${groupId}, 用户 ${userId}, 输入: ${input}`)
+      }
       await this.rejectRequest(bot, request, config, '验证码错误')
     }
   }
