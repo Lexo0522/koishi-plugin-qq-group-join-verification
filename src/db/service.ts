@@ -64,11 +64,11 @@ class DatabaseService {
     try {
       const model = this.ctx.model as any
       if (table === 'group_config' && data.groupId) {
-        await model.upsert(table, { groupId: data.groupId }, data)
+        await model.upsert(table, { groupId: data.groupId }, [data])
       } else if (table === 'whitelist' && data.userId) {
-        await model.upsert(table, { userId: data.userId }, data)
+        await model.upsert(table, { userId: data.userId }, [data])
       } else if (table === 'super_admin' && data.userId) {
-        await model.upsert(table, { userId: data.userId }, data)
+        await model.upsert(table, { userId: data.userId }, [data])
       }
     } catch (error) {
       this.logger.warn(`Failed to set ${table}:`, error)
@@ -162,7 +162,7 @@ class DatabaseService {
     await this.safeSet('whitelist', {
       userId,
       remark,
-      createTime: new Date(),
+      createTime: Date.now(),
     })
   }
 
@@ -183,7 +183,7 @@ class DatabaseService {
   async addVerifyRecord(record: any) {
     await this.safeCreate('verify_record', {
       ...record,
-      verifyTime: new Date(),
+      verifyTime: Date.now(),
     })
   }
 
@@ -221,7 +221,7 @@ class DatabaseService {
     await this.safeSet('super_admin', {
       userId,
       remark,
-      createTime: new Date(),
+      createTime: Date.now(),
     })
   }
 

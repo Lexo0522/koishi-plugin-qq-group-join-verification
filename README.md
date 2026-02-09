@@ -4,6 +4,15 @@ Koishi 插件，用于 QQ 群加群验证，支持多适配器、多群独立配
 
 ## 📋 更新记录
 
+### v1.0.63
+- 数据库错误修复：
+  - 修复 MySQL 数据库中 `createTime` 字段默认值设置错误，移除 `initial: Date.now()` 动态默认值
+  - 修复 `verifyTime` 字段默认值设置错误，确保与 MySQL 兼容
+  - 修复 `model.upsert` 方法调用错误，将单个对象参数改为数组形式 `[data]`
+  - 修复时间戳类型错误，将 `new Date()` 改为 `Date.now()` 以获取数字类型时间戳
+  - 解决 "ER_INVALID_DEFAULT: Invalid default value for 'createTime'" 错误
+  - 解决 "TypeError: upsert.map is not a function" 错误
+
 ### v1.0.62
 - 数据库系统修复：
   - 修复数据库表注册问题，确保表结构定义符合 Minato 规范

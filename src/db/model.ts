@@ -97,7 +97,6 @@ export const TableStructures = {
     },
     createTime: {
       type: 'integer',
-      initial: Date.now(),
       nullable: false
     }
   },
@@ -126,7 +125,6 @@ export const TableStructures = {
     },
     verifyTime: {
       type: 'integer',
-      initial: Date.now(),
       nullable: false
     }
   },
@@ -141,7 +139,6 @@ export const TableStructures = {
     },
     createTime: {
       type: 'integer',
-      initial: Date.now(),
       nullable: false
     }
   }
