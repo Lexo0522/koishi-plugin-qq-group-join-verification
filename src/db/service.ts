@@ -5,20 +5,34 @@ import { TableStructures } from './model'
 export function registerTables(ctx: Context): boolean {
   try {
     const model = ctx.model as any
-    
+
     if (!model) {
       throw new Error('Database model is not available')
     }
-    
+
     ctx.logger('qq-group-join-verification').info('Starting database table registration...')
-    
+
     // 极简注册表逻辑：直接传递纯对象给 ctx.model.define
     for (const [tableName, fields] of Object.entries(TableStructures)) {
       ctx.logger('qq-group-join-verification').info(`Registering table: ${tableName}`)
-      model.define(tableName, fields)
+      let primary: string | undefined
+      if (tableName === 'group_config') {
+        primary = 'groupId'
+      } else if (tableName === 'whitelist') {
+        primary = 'userId'
+      } else if (tableName === 'verify_record') {
+        primary = 'id'
+      } else if (tableName === 'super_admin') {
+        primary = 'userId'
+      }
+      let autoInc: boolean | undefined
+      if (tableName === 'verify_record') {
+        autoInc = true
+      }
+      model.extend(tableName, fields, { primary, autoInc })
       ctx.logger('qq-group-join-verification').info(`✓ ${tableName} table registered successfully`)
     }
-    
+
     ctx.logger('qq-group-join-verification').info('All database tables registered successfully')
     return true
   } catch (error) {
@@ -87,7 +101,7 @@ class DatabaseService {
     try {
       const config = await this.safeGet('group_config', { groupId })
       if (config) return config
-      
+
       // 创建默认配置
       const defaultConfig = {
         groupId,
@@ -100,7 +114,7 @@ class DatabaseService {
         rejectMsg: '验证失败，拒绝加入群聊',
         timeoutMsg: '验证超时，拒绝加入群聊'
       }
-      
+
       await this.safeSet('group_config', defaultConfig)
       return defaultConfig
     } catch (error) {
@@ -178,10 +192,10 @@ class DatabaseService {
       const query: any = {}
       if (groupId) query.groupId = groupId
       if (userId) query.userId = userId
-      
+
       const records = await this.safeGet('verify_record', query, { limit: pageSize * page })
       if (!records || !Array.isArray(records)) return []
-      
+
       // 排序和分页
       return records
         .sort((a: any, b: any) => new Date(b.verifyTime).getTime() - new Date(a.verifyTime).getTime())

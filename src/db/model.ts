@@ -19,7 +19,7 @@ export interface GroupConfig {
 export interface Whitelist {
   userId: number
   remark?: string
-  createTime: Date
+  createTime: number
 }
 
 export interface VerifyRecord {
@@ -28,13 +28,13 @@ export interface VerifyRecord {
   userId: number
   type: VerifyType
   result: VerifyResult
-  verifyTime: Date
+  verifyTime: number
 }
 
 export interface SuperAdmin {
   userId: number
   remark?: string
-  createTime: Date
+  createTime: number
 }
 
 // 数据库模型定义
@@ -43,54 +43,52 @@ export const TableStructures = {
   group_config: {
     groupId: {
       type: 'integer',
-      primary: true,
       nullable: false
     },
     mode: {
       type: 'string',
-      default: 'captcha',
+      initial: 'captcha',
       nullable: false
     },
     captchaLength: {
       type: 'integer',
-      default: 4,
+      initial: 4,
       nullable: false
     },
     timeout: {
       type: 'integer',
-      default: 300,
+      initial: 300,
       nullable: false
     },
     skipInGroupUser: {
       type: 'boolean',
-      default: true,
+      initial: true,
       nullable: false
     },
     waitingMsg: {
       type: 'string',
-      default: '请输入验证码：{captcha}，{timeout}秒内有效',
+      initial: '请输入验证码：{captcha}，{timeout}秒内有效',
       nullable: false
     },
     approveMsg: {
       type: 'string',
-      default: '验证通过，欢迎加入群聊！',
+      initial: '验证通过，欢迎加入群聊！',
       nullable: false
     },
     rejectMsg: {
       type: 'string',
-      default: '验证失败，拒绝加入群聊',
+      initial: '验证失败，拒绝加入群聊',
       nullable: false
     },
     timeoutMsg: {
       type: 'string',
-      default: '验证超时，拒绝加入群聊',
+      initial: '验证超时，拒绝加入群聊',
       nullable: false
     }
   },
   whitelist: {
     userId: {
       type: 'integer',
-      primary: true,
       nullable: false
     },
     remark: {
@@ -98,18 +96,14 @@ export const TableStructures = {
       nullable: true
     },
     createTime: {
-      type: 'datetime',
-      default: function() {
-        return new Date()
-      },
+      type: 'integer',
+      initial: Date.now(),
       nullable: false
     }
   },
   verify_record: {
     id: {
       type: 'integer',
-      primary: true,
-      autoIncrement: true,
       nullable: false
     },
     groupId: {
@@ -122,26 +116,23 @@ export const TableStructures = {
     },
     type: {
       type: 'string',
-      default: 'captcha',
+      initial: 'captcha',
       nullable: false
     },
     result: {
       type: 'string',
-      default: 'pass',
+      initial: 'pass',
       nullable: false
     },
     verifyTime: {
-      type: 'datetime',
-      default: function() {
-        return new Date()
-      },
+      type: 'integer',
+      initial: Date.now(),
       nullable: false
     }
   },
   super_admin: {
     userId: {
       type: 'integer',
-      primary: true,
       nullable: false
     },
     remark: {
@@ -149,10 +140,8 @@ export const TableStructures = {
       nullable: true
     },
     createTime: {
-      type: 'datetime',
-      default: function() {
-        return new Date()
-      },
+      type: 'integer',
+      initial: Date.now(),
       nullable: false
     }
   }
